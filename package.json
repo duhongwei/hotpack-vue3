@@ -1,0 +1,36 @@
+{
+  "name": "@q/hotpack-vue3",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "hotpack vue plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint index.js && eslint lib&&eslint main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duhongwei/hotpack-vue3.git"
+  },
+  "keywords": [],
+  "author": "duhongwei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/duhongwei/hotpack-vue3/issues"
+  },
+  "homepage": "https://github.com/duhongwei/hotpack-vue3#readme",
+  "dependencies": {
+    "@vue/server-renderer": "^3.0.11",
+    "vue": "^3.0.11",
+    "vuex": "^4.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.18.0",
+    "eslint-plugin-vue": "^7.5.0"
+  },
+  "maintainers": [
+    {
+      "name": "duhongwei",
+      "email": "duhongwei@360.cn"
+    }
+  ]
+}
