@@ -1,6 +1,6 @@
 {
   "name": "@q/hotpack-vue3",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "hotpack vue plugin",
   "main": "index.js",

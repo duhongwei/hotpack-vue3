@@ -1,4 +1,4 @@
-import { join, resolve,dirname } from 'path'
+import { join, resolve, dirname } from 'path'
 import { toFiles } from './lib/index.js'
 
 import { renderToString } from '@vue/server-renderer'
@@ -23,11 +23,17 @@ export default async function ({ debug }) {
   this.on('afterParse', async function (files) {
     this.files = files.filter(item => !isVue(item.key))
   })
-  
+
   this.on('afterRead', async function () {
     let prePath = dirname(require.resolve('vue'))
-    let path = join(prePath, 'dist/vue.global.js')
-  
+    let path = ''
+    if (this.isDev()) {
+      path = join(prePath, 'dist/vue.global.js')
+    }
+    else {
+      path = join(prePath, 'dist/vue.global.prod.js')
+    }
+
     let content = await this.fs.readFile(path)
     content = `
     ${content}
@@ -35,10 +41,13 @@ export default async function ({ debug }) {
     export default Vue
     `
     this.files.push({
+      //无论是dev,还是pro都标识为 min，就是不压缩,不buble
+      meta: { isMin: true},
       path,
       content
     })
-    prePath= dirname(require.resolve('vuex'))
+
+    prePath = dirname(require.resolve('vuex'))
     path = join(prePath, 'vuex.global.js');
 
     content = await this.fs.readFile(path)
@@ -86,9 +95,9 @@ export default async function ({ debug }) {
           let { default: controller } = await import(path)
 
           let { app } = await controller()
-          
+
           let s = await renderToString(app)
-          
+
           return `<div id='${id}'>${s}</div>`
         })
       }
