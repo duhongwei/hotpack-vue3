@@ -1,6 +1,6 @@
 {
   "name": "@q/hotpack-vue3",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "description": "hotpack vue plugin",
   "main": "index.js",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@vue/server-renderer": "^3.0.11",
     "vue": "^3.0.11",
+    "vue-router": "^4.0.10",
     "vuex": "^4.0.1"
   },
   "devDependencies": {

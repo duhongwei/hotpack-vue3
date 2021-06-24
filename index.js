@@ -37,8 +37,8 @@ export default async function ({ debug }) {
     let content = await this.fs.readFile(path)
     content = `
     ${content}
-    window.Vue=Vue
-    export default Vue
+    window.Vue=Vue;
+    export default Vue;
     `
     this.files.push({
       //无论是dev,还是pro都标识为 min，就是不压缩,不buble
@@ -53,12 +53,27 @@ export default async function ({ debug }) {
     content = await this.fs.readFile(path)
     content = `
     ${content}
-    export default Vuex
+    export default Vuex;
     `
     this.files.push({
       path,
       content
     })
+
+    prePath = dirname(require.resolve('vue-router'))
+    path = join(prePath, 'vue-router.global.js');
+  
+    content = await this.fs.readFile(path)
+    content = `
+  ${content}
+    export default VueRouter;
+    `
+    this.files.push({
+      meta: { isMin: true},
+      path,
+      content
+    })
+
   })
   this.on('afterRead', async function (files) {
     let addedFiles = []
@@ -95,7 +110,7 @@ export default async function ({ debug }) {
           let { default: controller } = await import(path)
 
           let { app } = await controller()
-
+     
           let s = await renderToString(app)
 
           return `<div id='${id}'>${s}</div>`
