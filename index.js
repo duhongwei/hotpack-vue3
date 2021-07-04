@@ -11,7 +11,7 @@ function isVue(key) {
 export default async function ({ debug }) {
 
   const { config: { dist }, util: { isHtml, replace } } = this
-  this.addResolveKey({
+  this.config.webPath.push({
     test: isVue,
     resolve: function ({ path }) {
       return `${path}.js`
@@ -24,7 +24,7 @@ export default async function ({ debug }) {
     this.files = files.filter(item => !isVue(item.key))
   })
 
-  this.on('afterRead', async function () {
+  this.on('afterKey', async function () {
     let prePath = dirname(require.resolve('vue'))
     let path = ''
     if (this.isDev()) {
@@ -33,17 +33,15 @@ export default async function ({ debug }) {
     else {
       path = join(prePath, 'dist/vue.global.prod.js')
     }
-
     let content = await this.fs.readFile(path)
     content = `
     ${content}
     window.Vue=Vue;
     export default Vue;
     `
-    this.files.push({
-      //无论是dev,还是pro都标识为 min，就是不压缩,不buble
-      meta: { isMin: true},
-      path,
+    this.addFile({
+      meta: { isMin: true },
+      key:'node/vue.js',
       content
     })
 
@@ -55,8 +53,9 @@ export default async function ({ debug }) {
     ${content}
     export default Vuex;
     `
-    this.files.push({
-      path,
+    this.addFile({
+      meta: { isMin: true},
+      key:'node/vuex.js',
       content
     })
 
@@ -68,9 +67,9 @@ export default async function ({ debug }) {
   ${content}
     export default VueRouter;
     `
-    this.files.push({
+    this.addFile({
       meta: { isMin: true},
-      path,
+      key:'node/vue-router.js',
       content
     })
 
@@ -82,15 +81,15 @@ export default async function ({ debug }) {
       debug(`toFiles ${file.path}`)
       //不能删除 ，因为后面的postcss css scope还要用到，vue分解出两个文件，但用的scope id是一个。
       //file.del = true
-      addedFiles = addedFiles.concat(toFiles(file))
-      toFiles(file).forEach(file => this.addFile(file))
+      //addedFiles = addedFiles.concat(toFiles(file))
+      toFiles(file).forEach(file => { this.addFile(file) })
     }
-
+   
   })
   //=====pre ssr 预编译======================
   if (this.config.renderEnabled) {
     this.on('afterRender', async (files) => {
-      let ssrConfig = await this.fs.readJson(join(dist, 'ssr.json'))
+      let ssrConfig = this.ssr
 
       for (let file of files) {
         if (!isHtml(file.key)) continue
@@ -104,8 +103,7 @@ export default async function ({ debug }) {
 
           let path = ssrConfig[file.key]
           if (!path) {
-            console.trace(`${file.key} not found`)
-            process.exit(1)
+            throw new Error(`${file.key} has not render function`,true)
           }
           let { default: controller } = await import(path)
 
