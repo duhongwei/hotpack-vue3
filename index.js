@@ -18,12 +18,6 @@ export default async function ({ debug }) {
     }
   })
 
-  //其它插件可以在afterSlim中对vue做出处理
-  //vue文件只是中间状态，是临时文件，需要删除
-  this.on('afterParse', async function (files) {
-    this.files = files.filter(item => !isVue(item.key))
-  })
-
   this.on('afterKey', async function () {
     let prePath = dirname(require.resolve('vue'))
     let path = ''
@@ -41,7 +35,7 @@ export default async function ({ debug }) {
     `
     this.addFile({
       meta: { isMin: true },
-      key:'node/vue.js',
+      key: 'node/vue.js',
       content
     })
 
@@ -54,22 +48,22 @@ export default async function ({ debug }) {
     export default Vuex;
     `
     this.addFile({
-      meta: { isMin: true},
-      key:'node/vuex.js',
+      meta: { isMin: true },
+      key: 'node/vuex.js',
       content
     })
 
     prePath = dirname(require.resolve('vue-router'))
     path = join(prePath, 'vue-router.global.js');
-  
+
     content = await this.fs.readFile(path)
     content = `
   ${content}
     export default VueRouter;
     `
     this.addFile({
-      meta: { isMin: true},
-      key:'node/vue-router.js',
+      meta: { isMin: true },
+      key: 'node/vue-router.js',
       content
     })
 
@@ -79,12 +73,12 @@ export default async function ({ debug }) {
     for (let file of files) {
       if (!isVue(file.path)) continue
       debug(`toFiles ${file.path}`)
-      //不能删除 ，因为后面的postcss css scope还要用到，vue分解出两个文件，但用的scope id是一个。
-      //file.del = true
-      //addedFiles = addedFiles.concat(toFiles(file))
+
+      file.del = true
+
       toFiles(file).forEach(file => { this.addFile(file) })
     }
-   
+    this.del()
   })
   //=====pre ssr 预编译======================
   if (this.config.renderEnabled) {
@@ -103,12 +97,12 @@ export default async function ({ debug }) {
 
           let path = ssrConfig[file.key]
           if (!path) {
-            throw new Error(`${file.key} has not render function`,true)
+            throw new Error(`${file.key} has not render function`, true)
           }
           let { default: controller } = await import(path)
 
           let { app } = await controller()
-     
+
           let s = await renderToString(app)
 
           return `<div id='${id}'>${s}</div>`
