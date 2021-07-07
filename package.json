@@ -1,11 +1,11 @@
 {
   "name": "@q/hotpack-vue3",
-  "version": "0.10.0",
+  "version": "0.12.0",
   "type": "module",
-  "description": "hotpack vue plugin",
+  "description": "hotpack vue3 plugin",
   "main": "index.js",
   "scripts": {
-    "test": "eslint index.js && eslint lib&&eslint main"
+    "test": "eslint index.js && eslint lib"
   },
   "repository": {
     "type": "git",
@@ -19,19 +19,21 @@
   },
   "homepage": "https://github.com/duhongwei/hotpack-vue3#readme",
   "dependencies": {
-    "@vue/server-renderer": "3.1.2",
-    "vue": "3.1.2",
+    "@vue/server-renderer": "3.1.4",
+    "vue": "3.1.4",
     "vue-router": "4.0.10",
     "vuex": "4.0.2"
   },
   "devDependencies": {
-    "eslint": "^7.18.0",
-    "eslint-plugin-vue": "^7.5.0"
+    "eslint": "^7.30.0"
   },
   "maintainers": [
     {
       "name": "duhongwei",
-      "email": "duhongwei@360.cn"
+      "email": "jack_xxxx@163.com"
     }
-  ]
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

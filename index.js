@@ -1,19 +1,22 @@
-import { join, resolve, dirname } from 'path'
+import { join, dirname } from 'path'
 import { toFiles } from './lib/index.js'
-
 import { renderToString } from '@vue/server-renderer'
 import { createRequire } from 'module';
+
 const require = createRequire(import.meta.url);
 
 function isVue(key) {
+
   return /\.vue$/.test(key)
 }
+
 export default async function ({ debug }) {
 
-  const { config: { dist }, util: { isHtml, replace } } = this
+  const { util: { isHtml, replace, getImportUrl } } = this
   this.config.webPath.push({
     test: isVue,
     resolve: function ({ path }) {
+
       return `${path}.js`
     }
   })
@@ -69,7 +72,6 @@ export default async function ({ debug }) {
 
   })
   this.on('afterRead', async function (files) {
-    let addedFiles = []
     for (let file of files) {
       if (!isVue(file.path)) continue
       debug(`toFiles ${file.path}`)
@@ -81,9 +83,9 @@ export default async function ({ debug }) {
     this.del()
   })
   //=====pre ssr 预编译======================
-  if (this.config.renderEnabled) {
-    this.on('afterRender', async (files) => {
-      let ssrConfig = this.ssr
+  if (this.config.render.enable) {
+    this.on('afterParseSsr', async (files) => {
+      const that = this
 
       for (let file of files) {
         if (!isHtml(file.key)) continue
@@ -95,11 +97,12 @@ export default async function ({ debug }) {
           }
           let id = m[1]
 
-          let path = ssrConfig[file.key]
+          let path = that.ssr.get(file.key)
+
           if (!path) {
             throw new Error(`${file.key} has not render function`, true)
           }
-          let { default: controller } = await import(path)
+          let { default: controller } = await import(getImportUrl(path))
 
           let { app } = await controller()
 
