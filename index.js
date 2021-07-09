@@ -2,6 +2,7 @@ import { join, dirname } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
 import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
 
@@ -82,8 +83,15 @@ export default async function ({ debug }) {
     }
     this.del()
   })
-  //=====pre ssr 预编译======================
+  //预编译
   if (this.config.render.enable) {
+
+    //meta信息需要在 init 插件的时候就准备好
+    const __filename = fileURLToPath(import.meta.url);
+    let info =await this.fs.readJson(join(__filename, '../', 'package.json'))
+
+    this.ssr.set('dep',info.dependencies)
+  
     this.on('afterParseSsr', async (files) => {
       const that = this
 
