@@ -1,9 +1,18 @@
 # hotpack-vue3
-hotpack plugin for vu3
+hotpack plugin for vue3
+
+可以clone 模板项目来体验所有功能
+
+```js
+git clone https://github.com/duhongwei/hotpack-tpl-vue3.git  my-app
+cd my-app
+npm install
+npm start
+```
 
 环境要求 node >=14
 
-vue3插件已经 把 `vue3`,`vuex@next` `vue-router@next` `@vue/server-renderer` 预安装了。
+vue3插件已经 把 `vue3`,`vuex@next` `vue-router@next` `@vue/server-renderer` 安装了。
 
 在项目中只要安装了vue3插件，上面模块就不用再安装了。
 不用担心要增加发布包的大小，如果你没有用到相关的模块，是不会打包到包里的。
@@ -21,25 +30,24 @@ vue3插件已经 把 `vue3`,`vuex@next` `vue-router@next` `@vue/server-renderer`
 ```html
 <div id='app' ssr>
 ```
-刷新页面就看到预编译的结果了
+服务端渲染需要服务端支持
 
-## 服务端渲染
-服务端渲染需要服务端支持，而且服务端的 vue render 版本必须和 vue 版本完全一致，所以vue3插件把版本信息放在 meta['vue3Dependences']
-
-在项目的配置文件里加上如下信息
+在项目的配置文件里加上如下配置信息
 ```js
 render:{
   enable:true,
-  versionKey:'vue3Dependences',
-  src:'render'
+  src:'./render'
 }
 ```
 src 是指示工具从哪里读服务端server的文件，读完后，会把src中的文件直接copy 到 dist
-  一般会有如何文件
+  服务端渲染需要准备的文件 
 1. index.js，启动web服务
-2. package.json  `versionKey`指定的依赖信息会和这里的依赖信息合并。有重复`versionKey`中的优先
+2. package.json
 3. https 用到的证书
 4. 其它的文件
+
+1，2，3是必须有的。
+> 插件中的 vue,vue-render 的版本信息会覆盖 ./render/package.json的信息，这是为了保证版本一致谢
 
 准备好之后
 ```shell

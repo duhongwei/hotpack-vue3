@@ -2,7 +2,6 @@ import { join, dirname } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
 
@@ -24,6 +23,9 @@ export default async function ({ debug }) {
 
   this.on('afterKey', async function () {
     let prePath = dirname(require.resolve('vue'))
+    if (!prePath) {
+      throw new Error(`please run "npm install vue"`)
+    }
     let path = ''
     if (this.isDev()) {
       path = join(prePath, 'dist/vue.global.js')
@@ -42,35 +44,39 @@ export default async function ({ debug }) {
       key: 'node/vue.js',
       content
     })
+    prePath = null
 
     prePath = dirname(require.resolve('vuex'))
-    path = join(prePath, 'vuex.global.js');
+    if (prePath) {
+      path = join(prePath, 'vuex.global.js');
 
-    content = await this.fs.readFile(path)
-    content = `
+      content = await this.fs.readFile(path)
+      content = `
     ${content}
     export default Vuex;
     `
-    this.addFile({
-      meta: { isMin: true },
-      key: 'node/vuex.js',
-      content
-    })
-
+      this.addFile({
+        meta: { isMin: true },
+        key: 'node/vuex.js',
+        content
+      })
+      prePath = null
+    }
     prePath = dirname(require.resolve('vue-router'))
-    path = join(prePath, 'vue-router.global.js');
+    if (prePath) {
+      path = join(prePath, 'vue-router.global.js');
 
-    content = await this.fs.readFile(path)
-    content = `
+      content = await this.fs.readFile(path)
+      content = `
   ${content}
     export default VueRouter;
     `
-    this.addFile({
-      meta: { isMin: true },
-      key: 'node/vue-router.js',
-      content
-    })
-
+      this.addFile({
+        meta: { isMin: true },
+        key: 'node/vue-router.js',
+        content
+      })
+    }
   })
   this.on('afterRead', async function (files) {
     for (let file of files) {
@@ -86,12 +92,6 @@ export default async function ({ debug }) {
   //预编译
   if (this.config.render.enable) {
 
-    //meta信息需要在 init 插件的时候就准备好
-    const __filename = fileURLToPath(import.meta.url);
-    let info =await this.fs.readJson(join(__filename, '../', 'package.json'))
-
-    this.ssr.set('dep',info.dependencies)
-  
     this.on('afterParseSsr', async (files) => {
       const that = this
 
