@@ -23,9 +23,7 @@ export default async function ({ debug }) {
 
   this.on('afterKey', async function () {
     let prePath = dirname(require.resolve('vue'))
-    if (!prePath) {
-      throw new Error(`please run "npm install vue"`)
-    }
+
     let path = ''
     if (this.isDev()) {
       path = join(prePath, 'dist/vue.global.js')
@@ -40,43 +38,49 @@ export default async function ({ debug }) {
     export default Vue;
     `
     this.addFile({
-      meta: { transformed: true,minified:true },
+      meta: { transformed: true, minified: true },
       key: 'node/vue.js',
       content
     })
     prePath = null
 
     prePath = dirname(require.resolve('vuex'))
-    if (prePath) {
+    if (this.isDev()) {
       path = join(prePath, 'vuex.global.js');
-
-      content = await this.fs.readFile(path)
-      content = `
+    }
+    else {
+      path = join(prePath, 'vuex.global.prod.js');
+    }
+    content = await this.fs.readFile(path)
+    content = `
     ${content}
     export default Vuex;
     `
-      this.addFile({
-        meta: { transformed: true,minified:true },
-        key: 'node/vuex.js',
-        content
-      })
-      prePath = null
-    }
-    prePath = dirname(require.resolve('vue-router'))
-    if (prePath) {
-      path = join(prePath, 'vue-router.global.js');
+    this.addFile({
+      meta: { transformed: true, minified: true },
+      key: 'node/vuex.js',
+      content
+    })
+    prePath = null
 
-      content = await this.fs.readFile(path)
-      content = `
+    prePath = dirname(require.resolve('vue-router'))
+    if (this.isDev()) {
+      path = join(prePath, 'vue-router.global.js');
+    }
+    else {
+      path = join(prePath, 'vue-router.global.prod.js');
+    }
+    content = await this.fs.readFile(path)
+    content = `
   ${content}
     export default VueRouter;
     `
-      this.addFile({
-        meta: { transformed: true,minified:true },
-        key: 'node/vue-router.js',
-        content
-      })
-    }
+    this.addFile({
+      meta: { transformed: true, minified: true },
+      key: 'node/vue-router.js',
+      content
+    })
+
   })
   this.on('afterRead', async function (files) {
     for (let file of files) {
