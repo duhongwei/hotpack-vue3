@@ -40,7 +40,7 @@ export default async function ({ debug }) {
     export default Vue;
     `
     this.addFile({
-      meta: { isMin: true },
+      meta: { transformed: true,minified:true },
       key: 'node/vue.js',
       content
     })
@@ -56,7 +56,7 @@ export default async function ({ debug }) {
     export default Vuex;
     `
       this.addFile({
-        meta: { isMin: true },
+        meta: { transformed: true,minified:true },
         key: 'node/vuex.js',
         content
       })
@@ -72,7 +72,7 @@ export default async function ({ debug }) {
     export default VueRouter;
     `
       this.addFile({
-        meta: { isMin: true },
+        meta: { transformed: true,minified:true },
         key: 'node/vue-router.js',
         content
       })
