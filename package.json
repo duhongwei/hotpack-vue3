@@ -1,6 +1,6 @@
 {
-  "name": "@q/hotpack-vue3",
-  "version": "0.17.0",
+  "name": "@duhongwei/hotpack-vue3",
+  "version": "0.18.0",
   "type": "module",
   "description": "hotpack vue3 plugin",
   "main": "index.js",
@@ -11,16 +11,17 @@
     "type": "git",
     "url": "git+https://github.com/duhongwei/hotpack-vue3.git"
   },
-  "keywords": [],
+  "keywords": [
+    "hotpack",
+    "vue3"
+  ],
   "author": "duhongwei",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/duhongwei/hotpack-vue3/issues"
   },
   "homepage": "https://github.com/duhongwei/hotpack-vue3#readme",
-  "dependencies": {
-    
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "^7.30.0"
   },
