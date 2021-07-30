@@ -8,7 +8,7 @@ environment  node >=14
 Don't worry about increasing the size of the release package. If you don't use the relevant modules, they won't be packaged in the package.
 
 ```bash
-npm install vue3,vuex@next vue-router@next @vue/server-renderer @uhongwei/hotpack-vue3
+npm install vue@next,vuex@next vue-router@next @vue/server-renderer @uhongwei/hotpack-vue3
 ```
 ## template 
 clone the template project to experience all the features
