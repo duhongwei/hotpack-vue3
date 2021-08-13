@@ -93,7 +93,7 @@ export default async function ({ debug }) {
     }
     this.del()
   })
-  //预编译
+  //prerendering
   if (this.config.render.enable) {
 
     this.on('afterParseSsr', async (files) => {
