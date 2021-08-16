@@ -1,8 +1,10 @@
 import { join, dirname } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Vuex from 'vuex'
 import { createRequire } from 'module';
-
 const require = createRequire(import.meta.url);
 
 function isVue(key) {
@@ -13,6 +15,7 @@ function isVue(key) {
 export default async function ({ debug }) {
 
   const { util: { isHtml, replace, getImportUrl } } = this
+
   this.config.webPath.push({
     test: isVue,
     resolve: function ({ path }) {
@@ -23,7 +26,6 @@ export default async function ({ debug }) {
 
   this.on('afterKey', async function () {
     let prePath = dirname(require.resolve('vue'))
-
     let path = ''
     if (this.isDev()) {
       path = join(prePath, 'dist/vue.global.js')
@@ -31,6 +33,7 @@ export default async function ({ debug }) {
     else {
       path = join(prePath, 'dist/vue.global.prod.js')
     }
+
     let content = await this.fs.readFile(path)
     content = `
     ${content}
@@ -42,15 +45,16 @@ export default async function ({ debug }) {
       key: 'node/vue.js',
       content
     })
-    prePath = null
 
     prePath = dirname(require.resolve('vuex'))
+
     if (this.isDev()) {
       path = join(prePath, 'vuex.global.js');
     }
     else {
       path = join(prePath, 'vuex.global.prod.js');
     }
+
     content = await this.fs.readFile(path)
     content = `
     ${content}
@@ -61,8 +65,6 @@ export default async function ({ debug }) {
       key: 'node/vuex.js',
       content
     })
-    prePath = null
-
     prePath = dirname(require.resolve('vue-router'))
     if (this.isDev()) {
       path = join(prePath, 'vue-router.global.js');
@@ -71,6 +73,7 @@ export default async function ({ debug }) {
       path = join(prePath, 'vue-router.global.prod.js');
     }
     content = await this.fs.readFile(path)
+
     content = `
   ${content}
     export default VueRouter;
@@ -102,27 +105,80 @@ export default async function ({ debug }) {
       for (let file of files) {
         if (!isHtml(file.key)) continue
 
-        file.content = await replace(file.content, /<div.*?\s+pre-ssr(>|\s+?.*?)<\/div>/, async (match) => {
-          let m = match.match(/\s*id=['"]?([^\s'"]+)['"]?/)
-          if (!m) {
-            throw new Error(`${file.key} pre-ssr has no id`)
-          }
-          let id = m[1]
+        file.content = await replace(file.content, /<div.*?\s+pre-ssr.*?><\/div>|\{\{\{(\w+)\}\}\}/g, async (match, key) => {
 
           let path = that.ssr.get(file.key)
 
           if (!path) {
             throw new Error(`${file.key} has not render function`, true)
           }
+
           let { default: controller } = await import(getImportUrl(path))
+          let { app, pageData } = await controller()
+          pageData = pageData || {}
 
-          let { app } = await controller()
+          if (match.startsWith('<div')) {
 
-          let s = await renderToString(app)
+            let m = match.match(/\s*id=['"]?([^\s'"]+)['"]?/)
+            if (!m) {
+              throw new Error(`${file.key} pre-ssr has no id`)
+            }
+            let id = m[1]
+            let s = await renderToString(app)
 
-          return `<div id='${id}'>${s}</div>`
+            return `<div id='${id}'>${s}</div>`
+          }
+          else {
+            return pageData[key]
+          }
+
         })
+
       }
     })
   }
+}
+async function replace(str, regex, asyncFn) {
+  const promises = [];
+  str.replace(regex, (match, ...args) => {
+    const promise = asyncFn(match, ...args);
+    promises.push(promise);
+  });
+  const data = await Promise.all(promises);
+  return str.replace(regex, () => data.shift());
+}
+
+async function ssr({ content, path, ctx }) {
+  
+  content = await replace(content, /<div.+?ssr.*?><\/div>|\{\{\{(\w+)\}\}\}/g, async (holder, key) => {
+    let controllerPath = path
+
+    if (!controllerPath) return holder
+
+    let { default: controller } = await import(controllerPath)
+    //https://github.com/yahoo/serialize-javascript consider using it to process the state
+    let { app, state, pageData } = await controller(ctx)
+    pageData = pageData || {}
+
+    if (holder.startsWith('<div')) {
+      let m = holder.match(/\s+?id=['"]?(.+?)['"]?\s+?/)
+      if (!m) throw 'ssr no id'
+      let id = m[1]
+      let s = await renderToString(app)
+      s = `<div id='${id}'>${s}</div>`
+      return `${s}<script>window.__state__=${JSON.stringify(state)};\n//render at: ${new Date().toLocaleString()}</script>`
+    }
+    else {
+      return pageData[key]
+    }
+  })
+  return content
+}
+
+export {
+  ssr,
+  Vue,
+  VueRouter,
+  Vuex,
+  renderToString
 }
