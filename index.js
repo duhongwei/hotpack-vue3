@@ -1,7 +1,7 @@
 import { join, dirname } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
-import Vue from 'vue'
+import * as Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import { createRequire } from 'module';
@@ -124,8 +124,11 @@ export default async function ({ debug }) {
               throw new Error(`${file.key} pre-ssr has no id`)
             }
             let id = m[1]
-            let s = await renderToString(app)
-
+            let s = await renderToString(app).catch(e => {
+              console.log(file.key)
+              console.error(e)
+              process.exit(1)
+            })
             return `<div id='${id}'>${s}</div>`
           }
           else {
