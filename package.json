@@ -1,6 +1,6 @@
 {
   "name": "@duhongwei/hotpack-vue3",
-  "version": "0.18.4",
+  "version": "0.19.0",
   "type": "module",
   "description": "hotpack vue3 plugin",
   "main": "index.js",

@@ -1,4 +1,4 @@
-import { join, dirname } from 'path'
+import { join, dirname, resolve } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
 import * as Vue from 'vue'
@@ -112,7 +112,7 @@ export default async function ({ debug }) {
           if (!path) {
             throw new Error(`${file.key} has not render function`, true)
           }
-
+          path = resolve(path)
           let { default: controller } = await import(getImportUrl(path))
           let { app, pageData } = await controller()
           pageData = pageData || {}
@@ -152,7 +152,7 @@ async function replace(str, regex, asyncFn) {
 }
 
 async function ssr({ content, path, ctx }) {
-  
+
   content = await replace(content, /<div.+?ssr.*?><\/div>|\{\{\{(\w+)\}\}\}/g, async (holder, key) => {
     let controllerPath = path
 
