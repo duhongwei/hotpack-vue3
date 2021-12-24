@@ -1,6 +1,6 @@
 {
   "name": "@duhongwei/hotpack-vue3",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "type": "module",
   "description": "hotpack vue3 plugin",
   "main": "index.js",
@@ -22,9 +22,9 @@
   },
   "homepage": "https://github.com/duhongwei/hotpack-vue3#readme",
   "dependencies": {
-    "@vue/server-renderer": "3.2.19",
-    "vue": "3.2.19",
-    "vue-router": "4.0.11",
+    "@vue/server-renderer": "3.2.26",
+    "vue": "3.2.26",
+    "vue-router": "4.0.12",
     "vuex": "4.0.2"
   },
   "devDependencies": {
