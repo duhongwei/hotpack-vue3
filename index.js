@@ -104,9 +104,9 @@ export default async function ({ debug }) {
 
       for (let file of files) {
         if (!isHtml(file.key)) continue
-
-        file.content = await replace(file.content, /<div.*?\s+pre-ssr.*?><\/div>|\{\{\{(\w+)\}\}\}/g, async (match, key) => {
-
+        let pageData = null;
+        file.content = await replace(file.content, /<div.*?\s+pre-ssr.*?><\/div>/g, async (match, key) => {
+          
           let path = that.ssr.get(file.key)
 
           if (!path) {
@@ -114,29 +114,26 @@ export default async function ({ debug }) {
           }
           path = resolve(path)
           let { default: controller } = await import(getImportUrl(path))
-          let { app, pageData } = await controller()
-          pageData = pageData || {}
+          let result = await controller()
+          pageData = resolve.pageData;
 
-          if (match.startsWith('<div')) {
-
-            let m = match.match(/\s*id=['"]?([^\s'"]+)['"]?/)
-            if (!m) {
-              throw new Error(`${file.key} pre-ssr has no id`)
-            }
-            let id = m[1]
-            let s = await renderToString(app).catch(e => {
-              console.log(file.key)
-              console.error(e)
-              process.exit(1)
-            })
-            return `<div id='${id}'>${s}</div>`
+          let m = match.match(/\s*id=['"]?([^\s'"]+)['"]?/)
+          if (!m) {
+            throw new Error(`${file.key} pre-ssr has no id`)
           }
-          else {
-            return pageData[key]
-          }
-
+          let id = m[1]
+          let s = await renderToString(result.app).catch(e => {
+            console.log(file.key)
+            console.error(e)
+            process.exit(1)
+          })
+          return `<div id='${id}'>${s}</div>`
         })
-
+        if (pageData) {
+          file.content = file.content.replace(/\{\{\{(\w+)\}\}\}/g, (_, key) => {
+            return pageData[key];
+          });
+        }
       }
     })
   }
