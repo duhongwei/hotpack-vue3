@@ -2,7 +2,7 @@ import { join, dirname, resolve } from 'path'
 import { toFiles } from './lib/index.js'
 import { renderToString } from '@vue/server-renderer'
 import * as Vue from 'vue'
-import VueRouter from 'vue-router'
+import * as  VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
